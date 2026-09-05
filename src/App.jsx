@@ -222,53 +222,57 @@ export default function App() {
                   )}
                 </div>
 
-                {searchQuery && (
-                  <p className="searching-text">Searching @{cleanUsername}...</p>
-                )}
+                <div className="searching-text-wrapper">
+                  {searchQuery && (
+                    <p className="searching-text">Searching @{cleanUsername}...</p>
+                  )}
+                </div>
               </div>
 
               {/* Loading Spinner or User Search Card */}
-              {isLoading ? (
-                <div className="spinner-container">
-                  <div className="loading-spinner"></div>
-                  <span style={{ fontSize: '13px', color: '#6c757d', fontWeight: 500 }}>
-                    Exchanging {formatCoins(coinAmount)} Coins for @{selectedUser.handle}...
-                  </span>
-                </div>
-              ) : cleanUsername ? (
-                /* Dynamic Search User Card */
-                <div 
-                  className="user-card" 
-                  onClick={handleOpenModal}
-                >
-                  <div className="user-avatar-wrapper">
-                    <img 
-                      src={profileData.avatarUrl} 
-                      alt={`${cleanUsername} profile`}
-                      className="user-avatar"
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUsername}`;
-                      }}
-                    />
+              <div className="search-result-area">
+                {isLoading ? (
+                  <div className="spinner-container">
+                    <div className="loading-spinner"></div>
+                    <span style={{ fontSize: '13px', color: '#6c757d', fontWeight: 500 }}>
+                      Exchanging {formatCoins(coinAmount)} Coins for @{selectedUser.handle}...
+                    </span>
                   </div>
-                  <div className="user-info">
-                    <span className="user-name">{profileData.displayName || cleanUsername}</span>
-                    <span className="user-handle">@{cleanUsername}</span>
-                    <span className="user-stats">{profileData.stats}</span>
+                ) : cleanUsername ? (
+                  /* Dynamic Search User Card */
+                  <div 
+                    className="user-card" 
+                    onClick={handleOpenModal}
+                  >
+                    <div className="user-avatar-wrapper">
+                      <img 
+                        src={profileData.avatarUrl} 
+                        alt={`${cleanUsername} profile`}
+                        className="user-avatar"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUsername}`;
+                        }}
+                      />
+                    </div>
+                    <div className="user-info">
+                      <span className="user-name">{profileData.displayName || cleanUsername}</span>
+                      <span className="user-handle">@{cleanUsername}</span>
+                      <span className="user-stats">{profileData.stats}</span>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                /* Prompt when search input is empty */
-                <div className="empty-search-prompt">
-                  Enter a TikTok username above to search and exchange coins
-                </div>
-              )}
+                ) : (
+                  /* Prompt when search input is empty */
+                  <div className="empty-search-prompt">
+                    Enter a TikTok username above to search and exchange coins
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ) : (
-          /* Screen 2: Success Screen ("Exchange Completed!") - IDENTICAL FIXED FRAME */
+          /* Screen 2: Success Screen ("Exchange Completed!") - IMMUTABLE MATCHING LAYOUT */
           <div className="success-screen">
             <div className="success-top-content">
               <div className="success-header-icon">
