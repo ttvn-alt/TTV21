@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, 
   Check, 
@@ -20,8 +20,19 @@ export default function App() {
   // Input state for search username
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Real-time lookup data for searched TikTok profile
+  const [profileData, setProfileData] = useState({
+    displayName: '',
+    avatarUrl: '',
+    stats: ''
+  });
+
   // Selected recipient user
-  const [selectedUser, setSelectedUser] = useState('happy_momonga');
+  const [selectedUser, setSelectedUser] = useState({
+    handle: 'happy_momonga',
+    displayName: 'happy_momonga',
+    avatarUrl: '/avatar.png'
+  });
 
   // Coin selection modal & exchange values
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,9 +60,50 @@ export default function App() {
     return val.toLocaleString('en-US');
   };
 
+  // Real-time TikTok profile lookup effect
+  useEffect(() => {
+    if (!cleanUsername) return;
+
+    // Default unique avatar per username
+    const uniqueAvatar = cleanUsername.toLowerCase() === 'happy_momonga' 
+      ? '/avatar.png'
+      : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanUsername)}`;
+
+    // Initial optimistic state
+    setProfileData({
+      displayName: cleanUsername,
+      avatarUrl: uniqueAvatar,
+      stats: cleanUsername.toLowerCase() === 'happy_momonga' 
+        ? '57 followers 92 following' 
+        : `${(cleanUsername.length * 43 + 89) % 950 + 15} followers ${(cleanUsername.length * 17) % 350 + 9} following`
+    });
+
+    // Attempt official TikTok OEmbed fetch to retrieve verified display name
+    const controller = new AbortController();
+    fetch(`https://www.tiktok.com/oembed?url=https://www.tiktok.com/@${cleanUsername}`, { signal: controller.signal })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && data.author_name) {
+          setProfileData(prev => ({
+            ...prev,
+            displayName: data.author_name
+          }));
+        }
+      })
+      .catch(() => {
+        // Silently use default unique state if offline or blocked
+      });
+
+    return () => controller.abort();
+  }, [cleanUsername]);
+
   // Open coin amount input modal when user card is clicked
-  const handleOpenModal = (targetUsername) => {
-    setSelectedUser(targetUsername || cleanUsername || 'happy_momonga');
+  const handleOpenModal = () => {
+    setSelectedUser({
+      handle: cleanUsername,
+      displayName: profileData.displayName || cleanUsername,
+      avatarUrl: profileData.avatarUrl
+    });
     setIsModalOpen(true);
   };
 
@@ -114,7 +166,7 @@ export default function App() {
           </div>
           <div className="toast-content">
             <div className="toast-title">TikTok LIVE Rewards</div>
-            <div className="toast-message">Successfully sent coins to @{selectedUser}</div>
+            <div className="toast-message">Successfully sent coins to @{selectedUser.handle}</div>
           </div>
         </div>
       )}
@@ -179,32 +231,31 @@ export default function App() {
               <div className="spinner-container">
                 <div className="loading-spinner"></div>
                 <span style={{ fontSize: '13px', color: '#6c757d', fontWeight: 500 }}>
-                  Exchanging {formatCoins(coinAmount)} Coins for @{selectedUser}...
+                  Exchanging {formatCoins(coinAmount)} Coins for @{selectedUser.handle}...
                 </span>
               </div>
             ) : cleanUsername ? (
               /* Dynamic Search User Card */
               <div 
                 className="user-card" 
-                onClick={() => handleOpenModal(cleanUsername)}
+                onClick={handleOpenModal}
               >
                 <div className="user-avatar-wrapper">
                   <img 
-                    src={`https://unavatar.io/tiktok/${cleanUsername}?fallback=https://api.dicebear.com/7.x/adventurer/svg?seed=${cleanUsername}`} 
+                    src={profileData.avatarUrl} 
                     alt={`${cleanUsername} profile`}
                     className="user-avatar"
+                    referrerPolicy="no-referrer"
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = `/avatar.png`;
+                      e.target.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUsername}`;
                     }}
                   />
                 </div>
                 <div className="user-info">
-                  <span className="user-name">{cleanUsername}</span>
+                  <span className="user-name">{profileData.displayName || cleanUsername}</span>
                   <span className="user-handle">@{cleanUsername}</span>
-                  <span className="user-stats">
-                    {cleanUsername === 'happy_momonga' ? '57 followers 92 following' : `${(cleanUsername.length * 29 + 52) % 900 + 12} followers ${(cleanUsername.length * 13) % 200 + 8} following`}
-                  </span>
+                  <span className="user-stats">{profileData.stats}</span>
                 </div>
               </div>
             ) : (
@@ -231,7 +282,7 @@ export default function App() {
             <div className="receipt-card">
               <div className="receipt-row">
                 <span className="receipt-key">Recipient</span>
-                <span className="receipt-value">@{selectedUser}</span>
+                <span className="receipt-value">@{selectedUser.handle}</span>
               </div>
               <div className="receipt-row">
                 <span className="receipt-key">Coins Exchanged</span>
@@ -288,13 +339,14 @@ export default function App() {
 
             <div className="modal-recipient-badge">
               <img 
-                src={`https://unavatar.io/tiktok/${selectedUser}?fallback=https://api.dicebear.com/7.x/adventurer/svg?seed=${selectedUser}`}
-                alt={selectedUser}
+                src={selectedUser.avatarUrl}
+                alt={selectedUser.handle}
                 className="modal-recipient-avatar"
+                referrerPolicy="no-referrer"
               />
               <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#121212' }}>@{selectedUser}</div>
-                <div style={{ fontSize: 11, color: '#868e96' }}>Recipient TikTok Account</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#121212' }}>{selectedUser.displayName}</div>
+                <div style={{ fontSize: 11, color: '#868e96' }}>@{selectedUser.handle}</div>
               </div>
             </div>
 
