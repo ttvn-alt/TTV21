@@ -9,6 +9,33 @@ import {
   ArrowLeft 
 } from 'lucide-react';
 
+// Custom Shiny Gold Coin Badge Component to prevent system font fallback tofu square boxes []
+const CoinBadge = ({ size = 16 }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    style={{ 
+      flexShrink: 0, 
+      display: 'inline-block', 
+      verticalAlign: 'middle',
+      marginRight: 3,
+      filter: 'drop-shadow(0px 1px 2px rgba(255, 149, 0, 0.4))'
+    }}
+  >
+    <circle cx="12" cy="12" r="10" fill="url(#coin-grad)" stroke="#E6A100" strokeWidth="1" />
+    <circle cx="12" cy="12" r="7" stroke="#FFFFFF" strokeWidth="1.2" strokeOpacity="0.7" />
+    <path d="M12 7.5v9M9.5 9.5h5M9.5 14.5h5" stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" />
+    <defs>
+      <linearGradient id="coin-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#FFD700" />
+        <stop offset="1" stopColor="#FF9500" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
 export default function App() {
   // Screen state: 'search' | 'success'
   const [screenState, setScreenState] = useState('search');
@@ -189,7 +216,7 @@ export default function App() {
                 <div className="sub-balance">
                   <span>~ {formatCurrency(balanceAmount)}</span>
                   <span>(</span>
-                  <span className="coin-icon">🪙</span>
+                  <CoinBadge size={16} />
                   <span>{formatCoins(totalCoins)})</span>
                 </div>
                 <p className="sub-balance-available">
@@ -282,7 +309,7 @@ export default function App() {
               <h2 className="success-title">Exchange Completed!</h2>
               
               <p className="success-subtitle">
-                You exchanged for <span className="coin-icon" style={{ width: 16, height: 16, fontSize: 9 }}>🪙</span> {formatCoins(coinAmount)} Coins
+                You exchanged for <CoinBadge size={16} /> {formatCoins(coinAmount)} Coins
               </p>
 
               {/* Receipt Details */}
@@ -377,19 +404,22 @@ export default function App() {
                 className={`preset-chip ${coinAmount === 5000000 ? 'active' : ''}`}
                 onClick={() => handleSelectPreset(5000000, 60500.00)}
               >
-                🪙 5,000,000
+                <CoinBadge size={14} />
+                <span>5,000,000</span>
               </button>
               <button 
                 className={`preset-chip ${coinAmount === 1000000 ? 'active' : ''}`}
                 onClick={() => handleSelectPreset(1000000, 12100.00)}
               >
-                🪙 1,000,000
+                <CoinBadge size={14} />
+                <span>1,000,000</span>
               </button>
               <button 
                 className={`preset-chip ${coinAmount === 500000 ? 'active' : ''}`}
                 onClick={() => handleSelectPreset(500000, 6050.00)}
               >
-                🪙 500,000
+                <CoinBadge size={14} />
+                <span>500,000</span>
               </button>
             </div>
 
