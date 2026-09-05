@@ -19,15 +19,23 @@ export default function App() {
   // Input state for search
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Selected user state for exchange recipient
+  const [selectedUser, setSelectedUser] = useState('happy_momonga');
+  
   // Loading state for 1.5s card click transition
   const [isLoading, setIsLoading] = useState(false);
 
   // Time state formatted specifically in Dubai timezone
   const [exchangeTime, setExchangeTime] = useState('');
 
+  // Derived current username from search query
+  const cleanUsername = searchQuery.trim().replace(/^@/, '') || 'happy_momonga';
+
   // Handle user card click action
-  const handleUserCardClick = () => {
+  const handleUserCardClick = (usernameToSelect) => {
+    setSelectedUser(usernameToSelect || cleanUsername);
     setIsLoading(true);
+    
     // Format timestamp in Gulf Standard Time (Asia/Dubai) as required
     const dubaiTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Dubai' });
     setExchangeTime(dubaiTime);
@@ -121,40 +129,47 @@ export default function App() {
               </div>
 
               {searchQuery && (
-                <p className="searching-text">Searching @{searchQuery.replace(/^@/, '')}...</p>
+                <p className="searching-text">Searching @{cleanUsername}...</p>
               )}
             </div>
 
-            {/* Loading Spinner or User Card */}
+            {/* Loading Spinner or Dynamic User Card */}
             {isLoading ? (
               <div className="spinner-container">
                 <div className="loading-spinner"></div>
                 <span style={{ fontSize: '13px', color: '#6c757d', fontWeight: 500 }}>
-                  Processing exchange...
+                  Searching & exchanging with @{selectedUser}...
                 </span>
               </div>
             ) : (
-              (searchQuery.trim().length > 0 || searchQuery.toLowerCase().includes('happy')) && (
-                <div className="user-card" onClick={handleUserCardClick}>
-                  <div className="user-avatar-wrapper">
-                    <img 
-                      src="/avatar.png" 
-                      alt="happy_momonga profile" 
-                      className="user-avatar"
-                      onError={(e) => {
-                        // Fallback SVG avatar if image fails to load
-                        e.target.onerror = null;
-                        e.target.src = 'https://api.dicebear.com/7.x/bottts/svg?seed=happy_momonga';
-                      }}
-                    />
-                  </div>
-                  <div className="user-info">
-                    <span className="user-name">happy_momonga</span>
-                    <span className="user-handle">@happy_momonga</span>
-                    <span className="user-stats">57 followers 92 following</span>
-                  </div>
+              // Display card whenever typing or default happy_momonga
+              <div 
+                className="user-card" 
+                onClick={() => handleUserCardClick(cleanUsername)}
+              >
+                <div className="user-avatar-wrapper">
+                  <img 
+                    src={`https://unavatar.io/tiktok/${cleanUsername}`} 
+                    alt={`${cleanUsername} profile`}
+                    className="user-avatar"
+                    onError={(e) => {
+                      // Fallback to local avatar image then SVG generator
+                      if (e.target.src !== window.location.origin + '/avatar.png') {
+                        e.target.src = '/avatar.png';
+                      } else {
+                        e.target.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUsername}`;
+                      }
+                    }}
+                  />
                 </div>
-              )
+                <div className="user-info">
+                  <span className="user-name">{cleanUsername}</span>
+                  <span className="user-handle">@{cleanUsername}</span>
+                  <span className="user-stats">
+                    {cleanUsername === 'happy_momonga' ? '57 followers 92 following' : `${(cleanUsername.length * 17) % 800 + 45} followers ${(cleanUsername.length * 9) % 300 + 12} following`}
+                  </span>
+                </div>
+              </div>
             )}
           </>
         ) : (
@@ -174,7 +189,7 @@ export default function App() {
             <div className="receipt-card">
               <div className="receipt-row">
                 <span className="receipt-key">Recipient</span>
-                <span className="receipt-value">@happy_momonga</span>
+                <span className="receipt-value">@{selectedUser}</span>
               </div>
               <div className="receipt-row">
                 <span className="receipt-key">Coins Exchanged</span>
