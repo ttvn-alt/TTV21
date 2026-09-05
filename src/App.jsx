@@ -173,145 +173,149 @@ export default function App() {
 
       <div className="app-content">
         {screenState === 'search' ? (
-          <>
-            {/* Screen 1: Header & Dynamic Deducting Balance */}
-            <div className="screen-header">
-              <button className="back-btn" title="Back">
-                <ChevronLeft size={24} />
-              </button>
-              <h1 className="header-title">Exchange</h1>
-            </div>
-
-            <div className="balance-section">
-              <p className="balance-label">TikTok Coins Balance</p>
-              <h2 className="big-balance">{formatCurrency(balanceAmount)}</h2>
-              <div className="sub-balance">
-                <span>~ {formatCurrency(balanceAmount)}</span>
-                <span>(</span>
-                <span className="coin-icon">🪙</span>
-                <span>{formatCoins(totalCoins)})</span>
+          <div className="screen-wrapper">
+            <div>
+              {/* Screen 1: Header & Dynamic Deducting Balance */}
+              <div className="screen-header">
+                <button className="back-btn" title="Back">
+                  <ChevronLeft size={24} />
+                </button>
+                <h1 className="header-title">Exchange</h1>
               </div>
-              <p className="sub-balance-available">
-                Available balance to exchange the Coins
-              </p>
-            </div>
 
-            {/* Search Input */}
-            <div className="search-form-group">
-              <label htmlFor="tiktok-username" className="search-label">
-                TikTok username
-              </label>
-              <div className="input-wrapper">
-                <input
-                  id="tiktok-username"
-                  type="text"
-                  className="search-input"
-                  placeholder="@username"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+              <div className="balance-section">
+                <p className="balance-label">TikTok Coins Balance</p>
+                <h2 className="big-balance">{formatCurrency(balanceAmount)}</h2>
+                <div className="sub-balance">
+                  <span>~ {formatCurrency(balanceAmount)}</span>
+                  <span>(</span>
+                  <span className="coin-icon">🪙</span>
+                  <span>{formatCoins(totalCoins)})</span>
+                </div>
+                <p className="sub-balance-available">
+                  Available balance to exchange the Coins
+                </p>
+              </div>
+
+              {/* Search Input */}
+              <div className="search-form-group">
+                <label htmlFor="tiktok-username" className="search-label">
+                  TikTok username
+                </label>
+                <div className="input-wrapper">
+                  <input
+                    id="tiktok-username"
+                    type="text"
+                    className="search-input"
+                    placeholder="@username"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  {searchQuery && (
+                    <button 
+                      className="clear-input-btn"
+                      onClick={() => setSearchQuery('')}
+                      title="Clear text"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+
                 {searchQuery && (
-                  <button 
-                    className="clear-input-btn"
-                    onClick={() => setSearchQuery('')}
-                    title="Clear text"
-                  >
-                    <X size={12} />
-                  </button>
+                  <p className="searching-text">Searching @{cleanUsername}...</p>
                 )}
               </div>
 
-              {searchQuery && (
-                <p className="searching-text">Searching @{cleanUsername}...</p>
+              {/* Loading Spinner or User Search Card */}
+              {isLoading ? (
+                <div className="spinner-container">
+                  <div className="loading-spinner"></div>
+                  <span style={{ fontSize: '13px', color: '#6c757d', fontWeight: 500 }}>
+                    Exchanging {formatCoins(coinAmount)} Coins for @{selectedUser.handle}...
+                  </span>
+                </div>
+              ) : cleanUsername ? (
+                /* Dynamic Search User Card */
+                <div 
+                  className="user-card" 
+                  onClick={handleOpenModal}
+                >
+                  <div className="user-avatar-wrapper">
+                    <img 
+                      src={profileData.avatarUrl} 
+                      alt={`${cleanUsername} profile`}
+                      className="user-avatar"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUsername}`;
+                      }}
+                    />
+                  </div>
+                  <div className="user-info">
+                    <span className="user-name">{profileData.displayName || cleanUsername}</span>
+                    <span className="user-handle">@{cleanUsername}</span>
+                    <span className="user-stats">{profileData.stats}</span>
+                  </div>
+                </div>
+              ) : (
+                /* Prompt when search input is empty */
+                <div className="empty-search-prompt">
+                  Enter a TikTok username above to search and exchange coins
+                </div>
               )}
             </div>
-
-            {/* Loading Spinner or User Search Card */}
-            {isLoading ? (
-              <div className="spinner-container">
-                <div className="loading-spinner"></div>
-                <span style={{ fontSize: '13px', color: '#6c757d', fontWeight: 500 }}>
-                  Exchanging {formatCoins(coinAmount)} Coins for @{selectedUser.handle}...
-                </span>
-              </div>
-            ) : cleanUsername ? (
-              /* Dynamic Search User Card */
-              <div 
-                className="user-card" 
-                onClick={handleOpenModal}
-              >
-                <div className="user-avatar-wrapper">
-                  <img 
-                    src={profileData.avatarUrl} 
-                    alt={`${cleanUsername} profile`}
-                    className="user-avatar"
-                    referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUsername}`;
-                    }}
-                  />
-                </div>
-                <div className="user-info">
-                  <span className="user-name">{profileData.displayName || cleanUsername}</span>
-                  <span className="user-handle">@{cleanUsername}</span>
-                  <span className="user-stats">{profileData.stats}</span>
-                </div>
-              </div>
-            ) : (
-              /* Prompt when search input is empty */
-              <div className="empty-search-prompt">
-                Enter a TikTok username above to search and exchange coins
-              </div>
-            )}
-          </>
+          </div>
         ) : (
-          /* Screen 2: Success Screen ("Exchange Completed!") */
+          /* Screen 2: Success Screen ("Exchange Completed!") - IDENTICAL FIXED FRAME */
           <div className="success-screen">
-            <div className="success-header-icon">
-              <Check size={36} strokeWidth={3} />
-            </div>
+            <div className="success-top-content">
+              <div className="success-header-icon">
+                <Check size={36} strokeWidth={3} />
+              </div>
 
-            <h2 className="success-title">Exchange Completed!</h2>
-            
-            <p className="success-subtitle">
-              You exchanged for <span className="coin-icon" style={{ width: 16, height: 16, fontSize: 9 }}>🪙</span> {formatCoins(coinAmount)} Coins
-            </p>
+              <h2 className="success-title">Exchange Completed!</h2>
+              
+              <p className="success-subtitle">
+                You exchanged for <span className="coin-icon" style={{ width: 16, height: 16, fontSize: 9 }}>🪙</span> {formatCoins(coinAmount)} Coins
+              </p>
 
-            {/* Receipt Details */}
-            <div className="receipt-card">
-              <div className="receipt-row">
-                <span className="receipt-key">Recipient</span>
-                <span className="receipt-value">@{selectedUser.handle}</span>
+              {/* Receipt Details */}
+              <div className="receipt-card">
+                <div className="receipt-row">
+                  <span className="receipt-key">Recipient</span>
+                  <span className="receipt-value">@{selectedUser.handle}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-key">Coins Exchanged</span>
+                  <span className="receipt-value">{formatCoins(coinAmount)} Coins</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-key">Deducted Amount</span>
+                  <span className="receipt-value">${deductedUsd.toFixed(2)}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-key">Time</span>
+                  <span className="receipt-value">
+                    {exchangeTime || new Date().toLocaleString('en-US', { timeZone: 'Asia/Dubai' })}
+                  </span>
+                </div>
               </div>
-              <div className="receipt-row">
-                <span className="receipt-key">Coins Exchanged</span>
-                <span className="receipt-value">{formatCoins(coinAmount)} Coins</span>
-              </div>
-              <div className="receipt-row">
-                <span className="receipt-key">Deducted Amount</span>
-                <span className="receipt-value">${deductedUsd.toFixed(2)}</span>
-              </div>
-              <div className="receipt-row">
-                <span className="receipt-key">Time</span>
-                <span className="receipt-value">
-                  {exchangeTime || new Date().toLocaleString('en-US', { timeZone: 'Asia/Dubai' })}
-                </span>
-              </div>
-            </div>
 
-            {/* Promo Banner */}
-            <div className="promo-banner">
-              <div className="promo-icon-bg">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 1 1-5.2-1.74 2.89 2.89 0 0 1 2.31-2.22V8.22a6.33 6.33 0 0 0-4.75 6.1 6.34 6.34 0 0 0 10.86 4.43c2.49-2.49 2.45-6.52 2.45-6.52a8.16 8.16 0 0 0 4.55 1.34V10.1a4.84 4.84 0 0 1-3-3.41z"/>
-                </svg>
-              </div>
-              <div className="promo-content">
-                <span className="promo-title">Start gifter level</span>
-                <p className="promo-text">
-                  Send your first Gift to begin your gifter journey and unlock more rewards as you level up.
-                </p>
+              {/* Promo Banner */}
+              <div className="promo-banner">
+                <div className="promo-icon-bg">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 1 1-5.2-1.74 2.89 2.89 0 0 1 2.31-2.22V8.22a6.33 6.33 0 0 0-4.75 6.1 6.34 6.34 0 0 0 10.86 4.43c2.49-2.49 2.45-6.52 2.45-6.52a8.16 8.16 0 0 0 4.55 1.34V10.1a4.84 4.84 0 0 1-3-3.41z"/>
+                  </svg>
+                </div>
+                <div className="promo-content">
+                  <span className="promo-title">Start gifter level</span>
+                  <p className="promo-text">
+                    Send your first Gift to begin your gifter journey and unlock more rewards as you level up.
+                  </p>
+                </div>
               </div>
             </div>
 
